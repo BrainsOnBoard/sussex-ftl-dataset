@@ -4,7 +4,9 @@ import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
 import math
-
+import pandas as pd
+import pathlib
+from collections.abc import Iterable
 
 def load_images(dir, greyscale=False):
     '''
@@ -19,16 +21,15 @@ def load_images(dir, greyscale=False):
         channels = cv.IMREAD_COLOR
 
     images = []
-    #dirListing = os.listdir(dir)
     # count .png files
     png_files_num = len([f for f in os.listdir(dir) if f.endswith('.png')])
     print('Found {} files in directory: {}'.format(png_files_num, dir))
-
-    path = dir + 'snapshot_'
-    for i in range(0, png_files_num):
-        img_path = path + str(i) + '.png'
+    path = os.path.join(dir, 'training.csv')
+    data = pd.read_csv(path).to_dict('list')
+    for i in data[' Filename']:
+        img_path = os.path.join(dir, i.strip("/").split('/')[-1])
         images.append(cv.imread(img_path, channels))
-
+    print('Loaded {} images with shape {}'.format(len(images), images[0].shape))
     return images
 
 
@@ -67,7 +68,13 @@ def idf(img, ref_img):
     :param ref_img:
     :return:
     """
-    return math.sqrt(((ref_img - img)**2).mean())
+    return cv.absdiff(ref_img, img).mean()
+
+
+def heatmap(ref_img, img):
+    heat = cv.absdiff(ref_img, img)
+    plt.imshow(heat, cmap='hot', interpolation='nearest')
+    plt.show()
 
 
 def imgs_diff(ref_img, images):
@@ -121,34 +128,23 @@ def plot_multiline(data, scatter=False):
 
 
 def rotate(d, image):
-    '''
-    Converts the degrees into columns and rotates the given image.
+    """
+    Converts the degrees into columns and rotates the image.
+    Positive degrees rotate the image clockwise
+    and negative degrees rotate the image counter clockwise
+    :param d: number of degrees the agent will rotate its view
+    :param image: An np.array that we want to shift.
+    :return: Returns the rotated image.
+    """
+    assert abs(d) <= 360
 
-    :param d: The number of degrees to rotate the inages.
-    Negative is to left, positive to the right
-    :param image: An nd.Array image, either with RGB channels or greyscale
-    :return: the rotated image nd.Array.
-    '''
-    if abs(d) > 360:
-      deg = abs(d) - 360
-    if d < 0:
-        d = abs(d)
-        num_of_cols = image.shape[1]
-        num_of_cols_perdegree = num_of_cols/360
-        cols_to_shift = num_of_cols - round(d * num_of_cols_perdegree)
-        img1 = image[:, cols_to_shift:num_of_cols]
-        img2 = image[:, 0: cols_to_shift]
-        return np.concatenate((img1, img2), axis=1)
-    else:
-        num_of_cols = image.shape[1]
-        num_of_cols_perdegree = num_of_cols/360
-        cols_to_shift = round(d * num_of_cols_perdegree)
-        img1 = image[:, cols_to_shift:num_of_cols]
-        img2 = image[:, 0: cols_to_shift]
-        return np.concatenate((img1, img2), axis=1)
+    num_of_cols = image.shape[1]
+    num_of_cols_perdegree = num_of_cols / 360
+    cols_to_shift = round(d * num_of_cols_perdegree)
+    return np.roll(image, -cols_to_shift, axis=1)
 
 
-def ridf(ref_img, current_img,  degrees, step):
+def ridf(ref_img, current_img,  degrees=306, step=1):
     degrees = round(degrees/2)
     rmse = []   # Hold the RMSEs between the current and the image of the route for every degree
     for k in range(-degrees, degrees, step):
@@ -175,7 +171,7 @@ def r_cor_coef(ref_img, current_img,  degrees, step):
     return r_coef
 
 
-def tridf(ref_img, route_imgs, degrees, step):
+def tridf(ref_img, route_imgs, degrees=360, step=1):
     '''
     Translation RIDF. Calculates the rotation image difference
     between a given reference image and the rest of the given
@@ -202,11 +198,11 @@ def ridf_field(route_imgs, degrees, step):
     :param step:
     :return:
     '''
-    trmse = []
+    field = []
     for img in route_imgs:
         ridf_logs = ridf(img, img, degrees, step)
-        trmse.append(ridf_logs)
-    return np.array(trmse)
+        field.append(ridf_logs)
+    return np.array(field)
 
 
 def cor_coef_field(route_imgs, degrees, step):
@@ -225,7 +221,14 @@ def cor_coef_field(route_imgs, degrees, step):
     return np.array(coef)
 
 
-def plot_3d(data, show=True, rows_cols_idx=111):
+def crop(imgs, x=0, y=0, h=-1, w=-1):
+    if isinstance(imgs, Iterable):
+        return [i[y:y + h, x:x + w] for i in imgs]
+    else:
+        return imgs[y:y + h, x:x + w]
+
+
+def plot_3d(data, show=True, rows_cols_idx=111, title=''):
     '''
     Plots the 2d data given in a 3d wireframe.
     Assumes first dimension is number of images,
@@ -246,4 +249,5 @@ def plot_3d(data, show=True, rows_cols_idx=111):
     # ax = fig.add_subplot(111, projection='3d')
     ax = plt.subplot(rows_cols_idx, projection='3d')
     ax.plot_wireframe(X, Y, data)
+    ax.title.set_text(title)
     if show: plt.show()
