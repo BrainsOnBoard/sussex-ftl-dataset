@@ -191,7 +191,7 @@ def tridf(ref_img, route_imgs, degrees=360, step=1):
 
 def ridf_field(route_imgs, degrees, step):
     '''
-    RIDF field. Calcualtes the rotation image difference (ridf)
+    RIDF field. Calculates the rotation image difference (ridf)
     between every image in the dataset and itself
     :param route_imgs:
     :param degrees:
@@ -207,7 +207,7 @@ def ridf_field(route_imgs, degrees, step):
 
 def cor_coef_field(route_imgs, degrees, step):
     '''
-    Correlation Coefficient field. Calcualtes the rotational correlation coefficient
+    Correlation Coefficient field. Calculates the rotational correlation coefficient
     between every image in the dataset and itself
     :param route_imgs:
     :param degrees:
