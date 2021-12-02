@@ -1,0 +1,65 @@
+%YAML:1.0
+---
+metadata:
+   time: "2021-12-02 15:05:30"
+   project_git_commit: "9b62b3e"
+   bob_robotics_git_commit: "9b62b3e"
+   is_experiment: 1
+   type: route
+   videoFile: "ftl001.avi"
+   frameRate: 15.
+   config:
+      shouldUseBinaryImage: 0
+      shouldUseHorizonVector: 0
+      shouldTrain: 1
+      shouldUseInfoMax: 0
+      shouldSaveTestingDiagnostic: 1
+      shouldStreamOutput: 0
+      shouldUseODK2: 0
+      outputPath: ftl001
+      shouldRecordVideo: 1
+      videoCodec: XVID
+      videoFileExtension: avi
+      maxSnapshotRotateDegrees: 90.
+      pmFwdLASize: -1
+      pmFwdLAIncreaseSize: 0
+      pmFwdLADecreaseSize: 0
+      pmMinFwdLASize: 0
+      pmMaxFwdLASize: 0
+      unwrapRes: [ 180, 50 ]
+      croppedRect: [ 0, 25, 180, 25 ]
+      maskImageFilename: ""
+      watershedMarkerImageFilename: "segmentation.png"
+      joystickDeadzone: 2.5000000000000000e-01
+      autoTrain: 1
+      trainInterval: 0.
+      testFrameSkip: 1
+      motorCommandInterval: 400.
+      motorTurnCommandInterval: 500.
+      serverListenPort: 2000
+      snapshotServerListenPort: 2001
+      bestSnapshotServerListenPort: 2002
+      moveSpeed: 5.0000000000000000e-01
+      turnThresholds:
+         -
+            - 10.
+            - 2.0000000298023224e-01
+            - 500.
+         -
+            - 20.
+            - 3.0000001192092896e-01
+            - 500.
+      viconTracking:
+         port: 51001
+         objectName: mecanum2
+   camera:
+      name: pixpro_usb
+      resolution: [ 1440, 1440 ]
+      isPanoramic: 1
+   imageInput:
+      unwrapper:
+         centre: [ 5.0694444444444442e-01, 5.1041666666666663e-01 ]
+         inner: 9.3750000000000000e-02
+         outer: 4.9027777777777776e-01
+         offsetDegrees: 0.
+         flip: 0
